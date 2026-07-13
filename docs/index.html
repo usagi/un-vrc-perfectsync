@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>U.N. VRC PerfectSync | USAGI.NETWORK</title>
+    <meta
+      name="description"
+      content="VRChatアバターの既存BlendShapeから、Perfect Sync 52 Keyを確認・作成するUnity Editorツール。"
+    />
+    <meta name="theme-color" content="#111514" />
+    <meta property="og:title" content="U.N. VRC PerfectSync" />
+    <meta
+      property="og:description"
+      content="既存の表情を、Perfect Sync 52 Keyへ。保守的なAuto Setupと手動調整を1つのEditor Windowで。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://usagi.github.io/un-vrc-perfectsync/" />
+    <meta
+      property="og:image"
+      content="https://usagi.github.io/un-vrc-perfectsync/assets/media/perfectsync-unity.webp"
+    />
+    <link rel="canonical" href="https://usagi.github.io/un-vrc-perfectsync/" />
+    <link rel="icon" href="assets/brand/un-logo-2026c1.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="shell nav-shell">
+        <a class="brand" href="https://usagi.network/" aria-label="USAGI.NETWORK home">
+          <img src="assets/brand/un-logo-2026c1.png" alt="" />
+          <span>
+            <strong>U.N. Apps</strong>
+            <small>USAGI.NETWORK</small>
+          </span>
+        </a>
+
+        <nav class="product-tabs" aria-label="U.N. Apps">
+          <a href="https://usagi.github.io/un-avatar/" style="--tab-accent: #ff8a64">
+            <span>Avatar</span>
+            <small>Renderer</small>
+          </a>
+          <a href="https://github.com/usagi/un-motion" style="--tab-accent: #4f8dff">
+            <span>Motion</span>
+            <small>Tracking</small>
+          </a>
+          <a href="https://github.com/usagi/un-virtual-avatar-connect" style="--tab-accent: #38bdf8">
+            <span>Connect</span>
+            <small>Hub</small>
+          </a>
+          <a
+            class="active"
+            href="https://usagi.github.io/un-vrc-perfectsync/"
+            style="--tab-accent: #67d9b3"
+            aria-current="page"
+          >
+            <span>PerfectSync</span>
+            <small>Unity Tool</small>
+          </a>
+        </nav>
+
+        <nav class="tool-links" aria-label="U.N. Tools">
+          <a href="https://github.com/usagi/un-virtual-eye-tracker">VET</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-backdrop" aria-hidden="true"></div>
+        <div class="shell hero-content">
+          <p class="eyebrow">U.N. VRC PerfectSync 1.0.0</p>
+          <h1 id="hero-title">U.N. VRC<br />PerfectSync</h1>
+          <p class="lead">既存の表情を、Perfect Sync 52 Keyへ。</p>
+          <p class="hero-body">
+            VRChatアバターの顔BlendShapeを確認し、Auto Setupと手動割り当てでPerfect Sync向けに整えるUnity Editorツール。
+          </p>
+          <div class="hero-meta" aria-label="動作環境">
+            <span>Unity 2022.3</span>
+            <span>VRChat Avatars 3.0</span>
+            <span>Editor only</span>
+          </div>
+          <div class="actions">
+            <a
+              class="button primary"
+              href="vcc://vpm/addRepo?url=https%3A%2F%2Fusagi.github.io%2Fun-vrc-perfectsync%2Fvcc%2Findex.json"
+            >
+              Add to VCC
+            </a>
+            <a class="button" href="https://github.com/usagi/un-vrc-perfectsync/blob/HEAD/docs/manual.md">Manual</a>
+            <a class="text-link" href="https://github.com/usagi/un-vrc-perfectsync/releases/latest">Latest Release</a>
+          </div>
+        </div>
+        <p class="hero-caption">PerfectSync Authoring Window in Unity 2022.3</p>
+      </section>
+
+      <section class="workflow-band" aria-label="PerfectSync authoring flow">
+        <div class="shell workflow-rail">
+          <span><strong>01</strong>Face Object</span>
+          <span><strong>02</strong>Auto Setup</span>
+          <span><strong>03</strong>Todoで迷わず設定</span>
+          <span><strong>04</strong>52 Keyを確認</span>
+        </div>
+      </section>
+
+      <section class="shell product-section">
+        <div class="section-heading">
+          <p class="eyebrow">One authoring window</p>
+          <h2>状態確認から割り当てまで、Unityの中で完結。</h2>
+          <p>
+            52 Keyを一覧で確認し、未設定のKeyだけを絞り込み。元になるBlendShapeの検索、プレビュー、係数調整を同じ画面で進められる。
+          </p>
+        </div>
+        <figure class="wide-shot">
+          <img
+            src="assets/media/perfectsync-unity.webp"
+            alt="Unity上でアバターとPerfectSync Authoring Windowを表示している画面"
+            width="1920"
+            height="1044"
+          />
+          <figcaption>Face Objectを指定すると、既存BlendShapeとPerfect Sync 52 Keyの状態を一覧化。</figcaption>
+        </figure>
+      </section>
+
+      <section class="auto-band">
+        <div class="shell auto-grid">
+          <div class="auto-copy">
+            <p class="eyebrow">Conservative Auto Setup</p>
+            <h2>候補と上書き範囲を、実行前に確認。</h2>
+            <p>
+              BlendShape名、左右、Avatar Descriptor、変形領域を解析。安全に判断できたKeyだけを提案し、直接割り当てとdelta生成の内訳を表示する。
+            </p>
+            <ul>
+              <li>通常は未設定のKeyだけを設定</li>
+              <li>設定済みKeyの再解析にも対応</li>
+              <li>判断できないKeyは手動設定として残す</li>
+            </ul>
+          </div>
+          <figure class="dialog-shot">
+            <img
+              src="assets/media/auto-setup-dialog.webp"
+              alt="Auto Setup候補と設定件数を確認するダイアログ"
+              width="595"
+              height="478"
+            />
+          </figure>
+        </div>
+      </section>
+
+      <section class="shell results-section">
+        <div class="section-heading compact">
+          <p class="eyebrow">Result</p>
+          <h2>モデルごとの表情を、実際の動きで確認。</h2>
+          <p>自動設定後もKeyごとの割り当てと係数を調整可能。異なる命名規則を持つアバターでも、元の表情を活かして整えられる。</p>
+        </div>
+        <div class="result-grid">
+          <figure>
+            <img
+              src="assets/media/mizuki-expression.webp"
+              alt="PerfectSync設定後にウィンクする瑞希"
+              width="643"
+              height="406"
+            />
+            <figcaption>
+              <strong>瑞希</strong>
+              <a href="https://booth.pm/ja/items/5132797">Paryi / IKUSIA</a>
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src="assets/media/blanca-expression.webp"
+              alt="PerfectSync設定後に笑顔を見せるBlanca;Redo"
+              width="804"
+              height="646"
+            />
+            <figcaption>
+              <strong>Blanca;Redo</strong>
+              <a href="https://booth.pm/ja/items/3290555">アトリエ・クルル</a>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="capability-band">
+        <div class="shell capability-grid">
+          <article>
+            <h2>52 Key Audit</h2>
+            <p>OK、UNDEFINED、EMPTY、CASEを一目で確認。</p>
+          </article>
+          <article>
+            <h2>Manual Control</h2>
+            <p>検索、プレビュー、複数割り当て、係数調整。</p>
+          </article>
+          <article>
+            <h2>Working Mesh</h2>
+            <p>元のMeshを直接変更せず、編集用Assetを作成。</p>
+          </article>
+          <article>
+            <h2>Backup / Reset</h2>
+            <p>大きな編集前の保存と、全Keyの再設定に対応。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell install-section" id="install">
+        <div class="install-main">
+          <p class="eyebrow">Install</p>
+          <h2>VCC Package Manager</h2>
+          <p>repositoryをVCCへ登録し、対象プロジェクトのManage Projectからインストール。</p>
+          <div class="actions">
+            <a
+              class="button primary"
+              href="vcc://vpm/addRepo?url=https%3A%2F%2Fusagi.github.io%2Fun-vrc-perfectsync%2Fvcc%2Findex.json"
+            >
+              Add to VCC
+            </a>
+            <a class="button" href="vcc/index.json">Repository JSON</a>
+          </div>
+        </div>
+        <div class="install-details">
+          <div>
+            <strong>Repository URL</strong>
+            <code>https://usagi.github.io/un-vrc-perfectsync/vcc/index.json</code>
+          </div>
+          <div>
+            <strong>Unity Package Manager</strong>
+            <code>https://github.com/usagi/un-vrc-perfectsync.git?path=/unity/un-vrc-perfectsync</code>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell footer-shell">
+        <span>U.N. VRC PerfectSync by USAGI.NETWORK</span>
+        <a href="https://github.com/usagi/un-vrc-perfectsync">GitHub</a>
+        <a href="https://github.com/usagi/un-vrc-perfectsync#readme">README</a>
+        <a href="https://github.com/usagi/un-vrc-perfectsync/blob/HEAD/LICENSE">MIT License</a>
+      </div>
+    </footer>
+  </body>
+</html>

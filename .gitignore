@@ -1,0 +1,43 @@
+# Unity generated state
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Unity and IDE generated files
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.vs/
+.vscode/
+.idea/
+
+# Unity build output
+[Bb]uild/
+[Bb]uilds/
+*.apk
+*.aab
+*.unitypackage
+
+# Release and verification output
+/target/
+/release-packages/
+/output/
+/.playwright-cli/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini

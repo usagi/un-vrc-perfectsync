@@ -1,0 +1,21 @@
+{
+  "name": "network.usagi.vrc-perfectsync",
+  "displayName": "U.N. VRC PerfectSync",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "VRChatアバターの既存BlendShapeからPerfect Sync 52 Keyを確認・作成するUnity Editorツール。",
+  "author": {
+    "name": "USAGI.NETWORK",
+    "email": "contact@usagi.network",
+    "url": "https://github.com/usagi/un-vrc-perfectsync"
+  },
+  "license": "MIT",
+  "keywords": [
+    "avatar",
+    "vrchat",
+    "vrcft",
+    "perfect-sync",
+    "arkit",
+    "blendshape"
+  ]
+}
