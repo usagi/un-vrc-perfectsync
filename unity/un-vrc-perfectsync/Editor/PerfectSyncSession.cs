@@ -62,6 +62,7 @@ internal sealed class PerfectSyncSession
 	public void Scan()
 	{
 		RestorePreview();
+		sourceDeltaCache.Clear();
 		EnsureKeyStates();
 		foreach (var key in PerfectSyncKeys.Names)
 		{
@@ -198,10 +199,12 @@ internal sealed class PerfectSyncSession
 		}
 
 		mesh = PerfectSyncMeshUtility.EnsureEditableMesh(TargetRenderer, Profile);
-		var removedCount = PerfectSyncMeshUtility.RemoveBlendShapesIgnoreCase(mesh, PerfectSyncKeys.Names);
+		var removedCount = RemoveKeysPreservingWeights(mesh, PerfectSyncKeys.Names);
 		foreach (var state in KeyStates.Values)
 		{
 			state.sources.Clear();
+			state.generatedSource = "";
+			state.generatedMethod = "";
 			state.warning = "";
 		}
 
@@ -211,6 +214,49 @@ internal sealed class PerfectSyncSession
 		Scan();
 		FlushProfile();
 		return removedCount;
+	}
+
+	public void ResetKey(string keyName)
+	{
+		if (!KeyStates.TryGetValue(keyName, out var state))
+		{
+			throw new ArgumentException("Unknown Perfect Sync Key", nameof(keyName));
+		}
+
+		RestorePreview();
+		var mesh = PerfectSyncMeshUtility.EnsureEditableMesh(TargetRenderer, Profile);
+		RemoveKeysPreservingWeights(mesh, new[] { keyName });
+		state.sources.Clear();
+		state.generatedSource = "";
+		state.generatedMethod = "";
+		AssetDatabase.SaveAssets();
+		Scan();
+		FlushProfile();
+	}
+
+	private int RemoveKeysPreservingWeights(Mesh mesh, IReadOnlyCollection<string> names)
+	{
+		var weights = new Dictionary<string, float>(StringComparer.Ordinal);
+		for (var i = 0; i < mesh.blendShapeCount; i++)
+		{
+			weights[mesh.GetBlendShapeName(i)] = TargetRenderer.GetBlendShapeWeight(i);
+		}
+
+		Undo.RecordObject(TargetRenderer, "Reset PerfectSync Key Weights");
+		// Clear old slots as well: Unity may retain trailing weights after removing shapes.
+		for (var i = 0; i < mesh.blendShapeCount; i++)
+		{
+			TargetRenderer.SetBlendShapeWeight(i, 0.0f);
+		}
+
+		var count = PerfectSyncMeshUtility.RemoveBlendShapesIgnoreCase(mesh, names);
+		for (var i = 0; i < mesh.blendShapeCount; i++)
+		{
+			TargetRenderer.SetBlendShapeWeight(i, weights[mesh.GetBlendShapeName(i)]);
+		}
+
+		EditorUtility.SetDirty(TargetRenderer);
+		return count;
 	}
 
 	public void ClearSelection()
@@ -260,6 +306,7 @@ internal sealed class PerfectSyncSession
 		mesh = PerfectSyncMeshUtility.EnsureEditableMesh(TargetRenderer, Profile);
 		var replacements = new Dictionary<string, BlendShapeDeltas>(StringComparer.Ordinal);
 		var pendingAssignments = new Dictionary<string, PerfectSyncSourceAssignment>(StringComparer.Ordinal);
+		var generated = new Dictionary<string, PerfectSyncAutoSetupSuggestion>(StringComparer.Ordinal);
 		foreach (var suggestion in plan.Suggestions)
 		{
 			if (!KeyStates.TryGetValue(suggestion.KeyName, out var state)
@@ -291,6 +338,7 @@ internal sealed class PerfectSyncSession
 			else if (suggestion.Deltas.HasValue)
 			{
 				replacements[state.keyName] = suggestion.Deltas.Value;
+				generated[state.keyName] = suggestion;
 			}
 			else
 			{
@@ -304,6 +352,8 @@ internal sealed class PerfectSyncSession
 		{
 			var state = KeyStates[keyName];
 			state.sources.Clear();
+			state.generatedSource = generated.TryGetValue(keyName, out var suggestion) ? suggestion.SourceName : "";
+			state.generatedMethod = suggestion?.Method ?? "";
 			if (pendingAssignments.TryGetValue(keyName, out var assignment))
 			{
 				state.sources.Add(assignment);
@@ -374,6 +424,8 @@ internal sealed class PerfectSyncSession
 		var mesh = PerfectSyncMeshUtility.EnsureEditableMesh(TargetRenderer, Profile);
 		var deltas = PerfectSyncMeshUtility.ComposeDeltas(mesh, state.sources, sourceDeltaCache);
 		PerfectSyncMeshUtility.AddOrReplaceBlendShape(mesh, state.keyName, deltas);
+		state.generatedSource = "";
+		state.generatedMethod = "";
 		AssetDatabase.SaveAssets();
 		sourceDeltaCache.Remove(state.keyName);
 		UpdateStateForKey(state.keyName);
@@ -432,7 +484,7 @@ internal sealed class PerfectSyncSession
 			return;
 		}
 
-		if (state.status == PerfectSyncKeyStatus.Existing)
+		if (state.status is PerfectSyncKeyStatus.Existing or PerfectSyncKeyStatus.Assigned)
 		{
 			var keyIndex = TargetRenderer.sharedMesh.GetBlendShapeIndex(state.keyName);
 			if (keyIndex >= 0)
@@ -577,12 +629,6 @@ internal sealed class PerfectSyncSession
 			}
 		}
 
-		if (hasAssignment)
-		{
-			state.status = PerfectSyncKeyStatus.Assigned;
-			return;
-		}
-
 		var index = PerfectSyncMeshUtility.FindBlendShapeIndexIgnoreCase(mesh, keyName, out var actualName, out var exactCase);
 		if (index < 0)
 		{
@@ -598,7 +644,11 @@ internal sealed class PerfectSyncSession
 			return;
 		}
 
-		state.status = PerfectSyncMeshUtility.IsBlendShapeEmpty(mesh, index) ? PerfectSyncKeyStatus.Empty : PerfectSyncKeyStatus.Existing;
+		state.status = PerfectSyncMeshUtility.IsBlendShapeEmpty(mesh, index)
+			? PerfectSyncKeyStatus.Empty
+			: hasAssignment || !string.IsNullOrEmpty(state.generatedSource)
+				? PerfectSyncKeyStatus.Assigned
+				: PerfectSyncKeyStatus.Existing;
 	}
 
 	private static bool IsCaseMismatch(PerfectSyncKeyState state)

@@ -43,6 +43,8 @@ internal sealed class PerfectSyncKeyState
 	public string keyName = "";
 	public PerfectSyncKeyStatus status = PerfectSyncKeyStatus.Undefined;
 	public string meshBlendShapeName = "";
+	public string generatedSource = "";
+	public string generatedMethod = "";
 	public readonly List<PerfectSyncSourceAssignment> sources = new();
 	public string warning = "";
 }

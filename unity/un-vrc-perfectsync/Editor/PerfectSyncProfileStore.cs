@@ -102,7 +102,7 @@ internal static class PerfectSyncProfileStore
 		}
 
 		profile.keys = keyStates.Values
-			.Where(state => state.sources.Count > 0 || !string.IsNullOrWhiteSpace(state.warning))
+			.Where(state => state.sources.Count > 0 || !string.IsNullOrEmpty(state.generatedSource) || !string.IsNullOrWhiteSpace(state.warning))
 			.Select(ToProfile)
 			.ToArray();
 		profile.vocabulary = DistinctVocabulary(vocabulary).ToArray();
@@ -120,6 +120,8 @@ internal static class PerfectSyncProfileStore
 		foreach (var state in keyStates.Values)
 		{
 			state.sources.Clear();
+			state.generatedSource = "";
+			state.generatedMethod = "";
 			state.warning = "";
 			state.status = PerfectSyncKeyStatus.Undefined;
 		}
@@ -134,6 +136,8 @@ internal static class PerfectSyncProfileStore
 				}
 
 				state.sources.Clear();
+				state.generatedSource = keyProfile.generatedSource ?? "";
+				state.generatedMethod = keyProfile.generatedMethod ?? "";
 				foreach (var source in keyProfile.sources ?? Array.Empty<PerfectSyncSourceProfile>())
 				{
 					state.sources.Add(new PerfectSyncSourceAssignment
@@ -166,16 +170,20 @@ internal static class PerfectSyncProfileStore
 		var profiles = AssetDatabase.FindAssets("t:PerfectSyncMappingProfile")
 			.Select(guid => AssetDatabase.GUIDToAssetPath(guid))
 			.Select(AssetDatabase.LoadAssetAtPath<PerfectSyncMappingProfile>)
-			.Where(profile => profile != null);
+			.Where(profile => profile != null)
+			.ToList();
+		// A working mesh is an explicit link. A shared original mesh alone is not.
+		var workingProfile = profiles.FirstOrDefault(profile => profile.workingMesh == renderer.sharedMesh);
+		if (workingProfile != null)
+		{
+			return workingProfile;
+		}
+
+		var rendererPath = HierarchyPath(renderer.transform);
 		foreach (var profile in profiles)
 		{
-			if (profile.workingMesh == renderer.sharedMesh || profile.targetMesh == renderer.sharedMesh)
-			{
-				return profile;
-			}
-
-			var rendererPath = HierarchyPath(renderer.transform);
-			if (!string.IsNullOrEmpty(profile.targetRendererPath) && profile.targetRendererPath == rendererPath)
+			if (profile.targetMesh == renderer.sharedMesh
+				&& !string.IsNullOrEmpty(profile.targetRendererPath) && profile.targetRendererPath == rendererPath)
 			{
 				return profile;
 			}
@@ -189,6 +197,8 @@ internal static class PerfectSyncProfileStore
 		return new PerfectSyncKeyProfile
 		{
 			keyName = state.keyName,
+			generatedSource = state.generatedSource,
+			generatedMethod = state.generatedMethod,
 			notes = state.warning,
 			sources = state.sources
 				.Select(source => new PerfectSyncSourceProfile

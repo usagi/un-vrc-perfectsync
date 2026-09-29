@@ -22,6 +22,8 @@ public sealed class PerfectSyncMappingProfile : ScriptableObject
 public sealed class PerfectSyncKeyProfile
 {
 	public string keyName = "";
+	public string generatedSource = "";
+	public string generatedMethod = "";
 	public bool ignored;
 	public PerfectSyncSourceProfile[] sources = Array.Empty<PerfectSyncSourceProfile>();
 	public string notes = "";

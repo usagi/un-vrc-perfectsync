@@ -674,6 +674,11 @@ public sealed class PerfectSyncAuthoringWindow : EditorWindow
 		header.Add(title);
 		header.Add(StatusChip(StatusChipText(state), state));
 		header.Add(Spacer());
+		if (state.status != PerfectSyncKeyStatus.Undefined || state.sources.Count > 0 || !string.IsNullOrEmpty(state.generatedSource))
+		{
+			header.Add(SecondaryButton("Reset Key...", 104.0f, () => ResetSelectedKey(state.keyName)));
+		}
+
 		if (state.status == PerfectSyncKeyStatus.Undefined)
 		{
 			var createEmptyButton = SecondaryButton("Create Empty", 104.0f, CreateEmptyBlendShapeForSelected);
@@ -692,6 +697,12 @@ public sealed class PerfectSyncAuthoringWindow : EditorWindow
 		}
 
 		BuildSelectedKeyGuidance(content, state);
+		if (!string.IsNullOrEmpty(state.generatedSource))
+		{
+			var generated = new Label($"Auto Setup: {state.generatedSource} ({state.generatedMethod})");
+			generated.style.whiteSpace = WhiteSpace.Normal;
+			content.Add(generated);
+		}
 		BuildAssignmentBrowser(content, state);
 		BuildAssignedSources(content, state);
 		BuildVocabulary(content);
@@ -705,13 +716,35 @@ public sealed class PerfectSyncAuthoringWindow : EditorWindow
 		RequestSelectionRefresh(oldSelectedKey);
 	}
 
+	private void ResetSelectedKey(string keyName)
+	{
+		if (!EditorUtility.DisplayDialog("Reset Perfect Sync Key",
+			$"{keyName} の BlendShape と割り当て・生成情報を削除し、UNDEFINED に戻します。\n他の Key と元の表情は残します。形状を保存する場合は先に Backup を実行してください。",
+			"この Key をリセット", "キャンセル"))
+		{
+			return;
+		}
+
+		try
+		{
+			Session.ResetKey(keyName);
+		}
+		catch (Exception exception) when (!(exception is OperationCanceledException))
+		{
+			EditorUtility.DisplayDialog("PerfectSync", exception.Message, "OK");
+		}
+
+		RequestAllRefresh();
+	}
+
 	private void BuildSelectedKeyGuidance(VisualElement parent, PerfectSyncKeyState state)
 	{
 		var text = state.status switch
 		{
+			PerfectSyncKeyStatus.Assigned when !string.IsNullOrEmpty(state.generatedSource) => "Auto Setup で合成・左右分割した形状です。Reset Key で解除できます。下の候補を割り当てると、生成した形状を置き換えます。",
 			PerfectSyncKeyStatus.Undefined => "この Key の BlendShape はまだありません。元になる表情を割り当てるか、必要な場合だけ空の BlendShape を作成します。",
 			PerfectSyncKeyStatus.Empty => "空の BlendShape があります。下の候補から元になる表情を選ぶと、この Key の動きを作成できます。",
-			PerfectSyncKeyStatus.Existing => "同名の BlendShape があります。必要に応じて候補を割り当て、動きを調整できます。",
+			PerfectSyncKeyStatus.Existing => "同名の BlendShape があります。候補の割り当てで置き換えるか、Reset Key でこの Key だけ解除できます。",
 			PerfectSyncKeyStatus.Assigned => "割り当て済みです。元になる表情の追加や係数の調整ができます。",
 			_ => "",
 		};
@@ -1419,6 +1452,7 @@ public sealed class PerfectSyncAuthoringWindow : EditorWindow
 	{
 		return state.status switch
 		{
+			PerfectSyncKeyStatus.Assigned when !string.IsNullOrEmpty(state.generatedSource) => $"Auto: {state.generatedSource} ({state.generatedMethod})",
 			PerfectSyncKeyStatus.Assigned when state.sources.Count > 0 => string.Join(", ", state.sources.Where(source => source.enabled).Select(source => $"{source.blendShapeName} x{source.coefficient:0.##}")),
 			PerfectSyncKeyStatus.Warning when IsCaseMismatch(state) => state.meshBlendShapeName,
 			PerfectSyncKeyStatus.Warning when !string.IsNullOrEmpty(state.warning) => state.warning,

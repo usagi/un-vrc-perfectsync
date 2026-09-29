@@ -30,6 +30,9 @@ U.N. VRC PerfectSync は、VRChat アバターの顔 Mesh に Perfect Sync 52 Ke
 - Case 修正は delta を変更しない。
 - 自動設定は低信頼または形状と明確に矛盾する候補を採用しない。
 - 自動再設定は検出できた Key だけを置き換え、検出できない手動設定を残す。
+- Rescan は変形キャッシュを破棄し、割り当て済みでも出力 Mesh の現状を検査する。
+- 合成・左右分割の生成元と生成方法は profile に保存する。通常の source 割り当てとは区別し、手動割り当てで形状を置き換えたら生成情報を消す。
+- Key 単位の Reset は対象だけを削除し、残る BlendShape の Weight を名前で引き継ぐ。
 
 ## State
 
@@ -55,6 +58,8 @@ outputDelta = sum(sourceDelta * coefficient)
 左右の合成や分割には境界付き推定を使い、係数を有限な範囲へ制限します。ランドマークを取得できない場合は、名称と Descriptor による保守的な判定へ戻します。
 
 ## Persistence
+
+profile の検索は working mesh の一致を優先し、元 Mesh を使う場合は階層パスの一致も必要とします。working mesh を意図的に共有する renderer は同じ profile を参照します。元 Mesh と階層パスが両方同じ別シーンの renderer を区別する永続 ID は、現在の profile にはありません。
 
 renderer ごとの mapping profile と working mesh は、既定で次へ保存します。
 
